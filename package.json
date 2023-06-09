@@ -4,6 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
+    "@aave/protocol-v2": "^1.0.1",
     "hardhat": "^2.14.0"
   },
   "devDependencies": {
