@@ -68,6 +68,13 @@ const borrowDai = async (lendingPool, amountToBorrow, account) => {
     console.log('You have borrowed');
 }
 
+const repay = async (lendingPool, amount, account) => {
+    await approveErc20(DAITokenAddress, lendingPool.address, amount, account);
+    const repayTX = await lendingPool.repay(DAITokenAddress, amount, 1, account);
+    await repayTX.wait(1);
+    console.log("REPAID")
+}
+
 const main = async () => {
     const { deployer } = await getNamedAccounts();
     await getWeth(deployer);
@@ -82,18 +89,22 @@ const main = async () => {
     await lendingPool.deposit(WETHContract, AMOUNT, deployer, 0)
     console.log("Deposited");
 
-   const before =  await getBorrowUserData(lendingPool, deployer);
+    const {availableBorrowsETH} =  await getBorrowUserData(lendingPool, deployer);
 
     const daiPrice = await getDAIPrice();
 
-    const amountDaiToBorrow = before.availableBorrowsETH.toString() * 0.95 * (1 / daiPrice.toNumber());
+    const amountDaiToBorrow = availableBorrowsETH.toString() * 0.95 * (1 / daiPrice.toNumber());
     const amountDaiToBorrowInWei = ethers.utils.parseEther(amountDaiToBorrow.toString());
 
     console.log('You can borrow ' + amountDaiToBorrow  + " DAI");
 
     await borrowDai(lendingPool, amountDaiToBorrowInWei, deployer);
 
-    const after = await getBorrowUserData(lendingPool, deployer);
+    await getBorrowUserData(lendingPool, deployer);
+
+    await repay(lendingPool, amountDaiToBorrowInWei, deployer);
+
+    await getBorrowUserData(lendingPool, deployer)
 }
 
 
